@@ -1,58 +1,80 @@
 package main
 
 import (
+  "os"
   "log"
+  "fmt"
   "io/ioutil"
-  "strconv"
+  "path/filepath"
   "encoding/xml"
 //  "github.com/nfnt/resize"
   "github.com/spf13/cobra"
-  "github.com/k0kubun/pp"
+//  "github.com/k0kubun/pp"
 )
 
-type Item uint64
+type CodePoint string
 
 type IntegerArray struct {
-  Name  string `xml:"name,attr"`
-  Items []Item  `xml:"item"`
+  Name       string      `xml:"name,attr"`
+  CodePoints []CodePoint `xml:"item"`
 }
 
 type Resources struct {
   IntegerArrays []IntegerArray `xml:"integer-array"`
 }
 
-func (item *Item) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (item *CodePoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
   var content string
   if err := d.DecodeElement(&content, &start); err != nil {
     return err
   }
-  codePoint, err := strconv.ParseUint(content, 0, 64)
-  if err != nil {
-    return err
-  }
-  *item = Item(codePoint)
+  *item = CodePoint(content[2:])
   return nil
 }
 
+func readResources (emojiXml string) (resources *Resources, err error) {
+  bytes, err := ioutil.ReadFile(emojiXml)
+  if err != nil {
+    return nil, err
+  }
+  resources = &Resources{}
+  err = xml.Unmarshal(bytes, resources)
+  if err != nil {
+    return nil, err
+  }
+  return
+}
+
 func main() {
-  var Source string
+  var InputXml string
+  var EmojiDir string
+  var EmojiPrefix string
   var SpritegenCmd = &cobra.Command{
     Use: "spritegen",
     Short: "Spritegen takes a set of codepoints and emoji assets and generates sprites for them",
     Run: func(cmd *cobra.Command, args []string) {
-      pp.Print(args)
-      bytes, err := ioutil.ReadFile("emoji.xml")
+      resources, err := readResources(InputXml)
       if err != nil {
         log.Fatal(err)
       }
-      resources := Resources{}
-      err = xml.Unmarshal(bytes, &resources)
-      if err != nil {
-        log.Fatal(err)
+      for _, intArray := range resources.IntegerArrays {
+        for _, codePoint := range intArray.CodePoints {
+          emojipath := filepath.Join(EmojiDir, EmojiPrefix + string(codePoint) + ".png")
+          fi, err := os.Stat(emojipath)
+          if err != nil {
+            log.Fatal(err)
+          }
+          if fi.Mode().IsRegular() {
+            fmt.Printf("%s exists!\n", emojipath)
+          } else {
+            fmt.Printf("%s DOES NOT EXISTTTT!\n", emojipath)
+          }
+        }
       }
-      pp.Print(resources.IntegerArrays)
     },
   }
-  SpritegenCmd.Flags().StringVarP(&Source, "input", "i", "emoji.xml", "Source Andriod resource XML file to read from.")
+  SpritegenCmd.Flags().StringVarP(&InputXml, "input", "i", "emoji.xml", "Source Android resource XML file to read from")
+  SpritegenCmd.Flags().StringVarP(&EmojiDir, "emoji", "e", "noto/color_emoji/png/128/", "Source emoji folder for lookup")
+  SpritegenCmd.Flags().StringVarP(&EmojiPrefix, "emoji-prefix", "p", "emoji_u", "Prefix used by emoji files")
   SpritegenCmd.Execute()
 }
