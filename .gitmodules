@@ -1,0 +1,3 @@
+[submodule "noto"]
+  path = noto
+  url = https://code.google.com/p/noto/
