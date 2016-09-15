@@ -1,6 +1,6 @@
-[submodule "noto"]
-  path = noto
-  url = https://code.google.com/p/noto/
 [submodule "twemoji"]
   path = twemoji
   url = https://github.com/twitter/twemoji/
+[submodule "noto-emoji"]
+	path = noto-emoji
+	url = https://github.com/googlei18n/noto-emoji.git

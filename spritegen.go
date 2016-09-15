@@ -125,7 +125,7 @@ func main() {
     },
   }
   SpritegenCmd.Flags().StringVarP(&InputXml, "input", "i", "emoji.xml", "Source Android resource XML file to read from")
-  SpritegenCmd.Flags().StringVarP(&EmojiDir, "emoji", "e", "noto/color_emoji/png/128/", "Source emoji folder for lookup")
+  SpritegenCmd.Flags().StringVarP(&EmojiDir, "emoji", "e", "noto-emoji/png/128/", "Source emoji folder for lookup")
   SpritegenCmd.Flags().StringVarP(&EmojiPrefix, "emoji-prefix", "p", "emoji_u", "Prefix used by emoji files")
   SpritegenCmd.Flags().IntVarP(&EmojiWidth, "emoji-width", "x", 136, "Input width of emoji (they are forced square)")
   SpritegenCmd.Flags().IntVarP(&EmojiHeight, "emoji-height", "y", 128, "input height of emoji (they are forced square)")
