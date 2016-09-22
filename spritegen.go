@@ -3,6 +3,7 @@ package main
 import (
   "os"
   "log"
+  "strings"
   "math"
   "io/ioutil"
   "image"
@@ -21,7 +22,7 @@ type IntegerArray struct {
 }
 
 type Resources struct {
-  IntegerArrays []IntegerArray `xml:"integer-array"`
+  IntegerArrays []IntegerArray `xml:"array"`
 }
 
 func (item *CodePoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -29,7 +30,14 @@ func (item *CodePoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) erro
   if err := d.DecodeElement(&content, &start); err != nil {
     return err
   }
-  *item = CodePoint(content[2:])
+  var codePoints []string
+  codePoints = strings.Split(content, ",")
+  for i,codePoint := range codePoints {
+    if len(codePoint) == 2 {
+	  codePoints[i] = "00" + codePoint
+    }
+  }
+  *item = CodePoint(strings.Join(codePoints, "_"))
   return nil
 }
 
